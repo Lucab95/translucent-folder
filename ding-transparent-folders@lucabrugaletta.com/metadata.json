@@ -1,0 +1,7 @@
+{
+    "description": "Desktop Organizer folder previews, built as a DING fork.",
+    "name": "Desktop Organizer Folders (DING Fork)",
+    "shell-version": ["46", "47", "48", "49"],
+    "uuid": "ding@rastersoft.com",
+    "url": "https://gitlab.com/rastersoft/desktop-icons-ng"
+}

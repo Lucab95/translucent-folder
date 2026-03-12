@@ -1,9 +1,8 @@
 {
-    "description": "Translucent preview-style desktop folders for GNOME, built on DING behavior.",
+    "description": "Translucent preview-style desktop folders for GNOME with single-click folder previews. Includes DING clipboard integration for desktop file copy and cut behavior.",
     "name": "Translucent Folders",
     "shell-version": ["46", "47", "48", "49"],
     "uuid": "translucent-folders@lucabrugaletta.github.io",
     "url": "https://github.com/Lucab95/translucent-folder",
-    "version": 1,
     "version-name": "0.1.0"
 }

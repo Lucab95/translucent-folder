@@ -19,6 +19,7 @@ Configurable settings:
 ## Repository Contents
 
 - [translucent-folders@lucabrugaletta.github.io](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/translucent-folders@lucabrugaletta.github.io): extension source
+- [build-release.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/build-release.sh): build the release zip without installing it
 - [scripts/install-translucent-folders.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/install-translucent-folders.sh): compile schemas, build the zip, and install locally with `gnome-extensions`
 - [ATTRIBUTION.md](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/ATTRIBUTION.md): upstream attribution for DING
 - [COPYING](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/COPYING): GPL license text
@@ -41,6 +42,7 @@ gnome-extensions prefs translucent-folders@lucabrugaletta.github.io
 The local installer also produces a zip in `dist/`:
 
 ```bash
+./scripts/build-release.sh
 dist/translucent-folders@lucabrugaletta.github.io.shell-extension.zip
 ```
 
@@ -50,3 +52,4 @@ That zip is the package you use for local testing and release preparation.
 
 - This project is derived from DING and remains GPL-covered accordingly.
 - The extension uses a unique UUID and is intended to be distributed as its own installable extension.
+- `extensions.gnome.org` review is still the main uncertainty, because the extension currently coordinates with stock `ding@rastersoft.com` and GNOME review guidelines treat interaction with other extensions as case-by-case.

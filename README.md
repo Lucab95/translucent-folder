@@ -16,6 +16,16 @@ Configurable settings:
 - whether expanded previews show item names
 - preferred folder tile size in pixels
 
+## Screenshots
+
+Initial folder look:
+
+![Closed folder preview tile](Folder%20initial.png)
+
+Expanded folder preview after click:
+
+![Expanded folder preview popover](Folder%20clicked.png)
+
 ## Repository Contents
 
 - [translucent-folders@lucabrugaletta.github.io](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/translucent-folders@lucabrugaletta.github.io): extension source

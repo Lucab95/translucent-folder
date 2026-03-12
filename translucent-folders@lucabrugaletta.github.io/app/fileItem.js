@@ -36,8 +36,6 @@ const Gettext = imports.gettext.domain('ding');
 
 const _ = Gettext.gettext;
 const PREVIEW_ICON_ATTRIBUTES = 'standard::name,standard::display-name,standard::type,standard::icon';
-const FOLDER_TILE_CHILDREN = 4;
-const FOLDER_POPOVER_CHILDREN = 6;
 
 var FileItem = class extends desktopIconItem.desktopIconItem {
     constructor(desktopManager, file, fileInfo, fileExtra, custom) {
@@ -442,6 +440,17 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
         return this._isDirectory && this._fileExtra === Enums.FileType.NONE;
     }
 
+    _getFolderPreviewItemLimit() {
+        return Math.max(1, Prefs.get_folder_preview_tile_items());
+    }
+
+    _getFolderPreviewSurfaceSize(scale) {
+        const preferredSize = Prefs.get_folder_preview_tile_size() * scale;
+        const maxWidth = Math.max(48 * scale, (Prefs.get_desired_width() - 16) * scale);
+        const maxHeight = Math.max(48 * scale, (Prefs.get_desired_height() - 34) * scale);
+        return Math.max(48 * scale, Math.min(preferredSize, maxWidth, maxHeight));
+    }
+
     _listFolderPreviewEntries(limit) {
         if (!this._supportsFolderPreview()) {
             return [];
@@ -505,14 +514,13 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
 
     _createFolderPreviewSurface() {
         const scale = this._icon.get_scale_factor();
-        const size = Prefs.get_icon_size() * scale;
-        const entries = this._listFolderPreviewEntries(FOLDER_TILE_CHILDREN);
+        const size = this._getFolderPreviewSurfaceSize(scale);
+        const entries = this._listFolderPreviewEntries(this._getFolderPreviewItemLimit());
         const surface = new Cairo.ImageSurface(Cairo.Format.ARGB32, size, size);
         const cr = new Cairo.Context(surface);
         const radius = Math.max(16 * scale, Math.floor(size * 0.2));
         const padding = Math.floor(size * 0.14);
         const gap = Math.max(4 * scale, Math.floor(size * 0.06));
-        const childSize = Math.max(16 * scale, Math.floor((size - (padding * 2) - gap) / 2));
         this._roundedRectangle(cr, 0, 0, size, size, radius);
         cr.setSourceRGBA(0.74, 0.77, 0.82, 0.66);
         cr.fillPreserve();
@@ -530,11 +538,21 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
             return surface;
         }
 
+        const columns = Math.max(1, Math.ceil(Math.sqrt(entries.length)));
+        const rows = Math.max(1, Math.ceil(entries.length / columns));
+        const childWidth = Math.floor((size - (padding * 2) - (gap * (columns - 1))) / columns);
+        const childHeight = Math.floor((size - (padding * 2) - (gap * (rows - 1))) / rows);
+        const childSize = Math.max(16 * scale, Math.min(childWidth, childHeight));
+        const gridWidth = (columns * childSize) + ((columns - 1) * gap);
+        const gridHeight = (rows * childSize) + ((rows - 1) * gap);
+        const startX = Math.floor((size - gridWidth) / 2);
+        const startY = Math.floor((size - gridHeight) / 2);
+
         entries.forEach((entry, index) => {
-            const col = index % 2;
-            const row = Math.floor(index / 2);
-            const x = padding + (col * (childSize + gap));
-            const y = padding + (row * (childSize + gap));
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+            const x = startX + (col * (childSize + gap));
+            const y = startY + (row * (childSize + gap));
             const pixbuf = this._lookupPixbufForInfo(entry.info, Math.max(16, Math.floor(childSize / scale)), scale);
             const iconX = x + Math.floor((childSize - pixbuf.width) / 2);
             const iconY = y + Math.floor((childSize - pixbuf.height) / 2);
@@ -549,6 +567,7 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
     _buildPreviewButton(entry) {
         const button = new Gtk.Button({relief: Gtk.ReliefStyle.NONE, focus_on_click: false});
         button.get_style_context().add_class('folder-preview-entry');
+        const showLabels = Prefs.get_folder_preview_show_item_labels();
 
         const content = new Gtk.Box({
             orientation: Gtk.Orientation.VERTICAL,
@@ -563,17 +582,20 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
         const scale = image.get_scale_factor ? image.get_scale_factor() : 1;
         image.set_from_pixbuf(this._lookupPixbufForInfo(entry.info, 48, scale));
 
-        const label = new Gtk.Label({
-            label: entry.info.get_display_name(),
-            justify: Gtk.Justification.CENTER,
-            wrap: true,
-            max_width_chars: 12,
-            lines: 2,
-        });
-        label.get_style_context().add_class('folder-preview-entry-label');
-
         content.pack_start(image, false, false, 0);
-        content.pack_start(label, false, false, 0);
+        if (showLabels) {
+            const label = new Gtk.Label({
+                label: entry.info.get_display_name(),
+                justify: Gtk.Justification.CENTER,
+                wrap: true,
+                max_width_chars: 12,
+                lines: 2,
+            });
+            label.get_style_context().add_class('folder-preview-entry-label');
+            content.pack_start(label, false, false, 0);
+        } else {
+            button.get_style_context().add_class('folder-preview-entry-icon-only');
+        }
         button.add(content);
         button.connect('clicked', () => {
             this._closeFolderPreview();
@@ -603,7 +625,8 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
             return;
         }
 
-        const entries = this._listFolderPreviewEntries(FOLDER_POPOVER_CHILDREN);
+        const entries = this._listFolderPreviewEntries(this._getFolderPreviewItemLimit());
+        const showLabels = Prefs.get_folder_preview_show_item_labels();
         const popover = new Gtk.Popover({
             relative_to: this._iconContainer,
             modal: true,
@@ -644,7 +667,7 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
                 column_spacing: 12,
                 row_spacing: 12,
                 min_children_per_line: 2,
-                max_children_per_line: 3,
+                max_children_per_line: showLabels ? 3 : 4,
                 selection_mode: Gtk.SelectionMode.NONE,
             });
             for (const entry of entries) {

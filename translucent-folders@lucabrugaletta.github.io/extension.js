@@ -32,6 +32,8 @@ import * as GnomeShellOverride from './gnomeShellOverride.js';
 
 const Clipboard = St.Clipboard.get_default();
 const CLIPBOARD_TYPE = St.ClipboardType.CLIPBOARD;
+const STOCK_DING_UUID = 'ding@rastersoft.com';
+const LEGACY_OVERLAY_UUID = 'transparent-folders@lucabrugaletta';
 
 export default class DING extends Extension {
     constructor(metadata) {
@@ -43,6 +45,10 @@ export default class DING extends Extension {
         this.data.currentProcess = null;
         this.data.dbusTimeoutId = 0;
         this.data.switchWorkspaceId = 0;
+        this.data.shellSettings = null;
+        this.data.managedStockDing = false;
+        this.data.stockDingWasEnabled = false;
+        this.data.toggleStockDingTimeoutId = 0;
 
         this.data.GnomeShellOverride = null;
 
@@ -66,6 +72,9 @@ export default class DING extends Extension {
     }
 
     enable() {
+        this._prepareExtensionToggles();
+        this._disableCompetingDesktopExtensions();
+
         if (!this.data.GnomeShellOverride) {
             this.data.GnomeShellOverride = new GnomeShellOverride.GnomeShellOverride();
         }
@@ -154,6 +163,110 @@ export default class DING extends Extension {
             GLib.source_remove(this.data.dbusTimeoutId);
             this.data.dbusTimeoutId = 0;
         }
+        if (this.data.toggleStockDingTimeoutId) {
+            GLib.source_remove(this.data.toggleStockDingTimeoutId);
+            this.data.toggleStockDingTimeoutId = 0;
+        }
+
+        this._restoreStockDing();
+    }
+
+    _prepareExtensionToggles() {
+        if (!this.data.shellSettings) {
+            this.data.shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell'});
+        }
+    }
+
+    _getEnabledExtensions() {
+        return this.data.shellSettings.get_strv('enabled-extensions');
+    }
+
+    _setEnabledExtensions(extensions) {
+        this.data.shellSettings.set_strv('enabled-extensions', extensions);
+    }
+
+    _callExtensionsDbus(method, uuid) {
+        Gio.DBus.session.call(
+            'org.gnome.Shell.Extensions',
+            '/org/gnome/Shell/Extensions',
+            'org.gnome.Shell.Extensions',
+            method,
+            new GLib.Variant('(s)', [uuid]),
+            null,
+            Gio.DBusCallFlags.NONE,
+            -1,
+            null,
+            null
+        );
+    }
+
+    _callExtensionManager(method, uuid) {
+        try {
+            if (method === 'DisableExtension') {
+                if (typeof Main.extensionManager.disableExtension === 'function')
+                    Main.extensionManager.disableExtension(uuid);
+                else if (typeof Main.extensionManager._callExtensionDisable === 'function')
+                    Main.extensionManager._callExtensionDisable(uuid);
+                else
+                    Main.extensionManager.lookup(uuid)?.stateObj?.disable?.();
+            } else if (method === 'EnableExtension') {
+                if (typeof Main.extensionManager.enableExtension === 'function')
+                    Main.extensionManager.enableExtension(uuid);
+                else if (typeof Main.extensionManager._callExtensionEnable === 'function')
+                    Main.extensionManager._callExtensionEnable(uuid);
+            }
+        } catch (error) {
+            logError(error, `Failed to ${method} ${uuid} via Main.extensionManager`);
+        }
+    }
+
+    _scheduleExtensionsDbus(method, uuid) {
+        if (this.data.toggleStockDingTimeoutId) {
+            GLib.source_remove(this.data.toggleStockDingTimeoutId);
+        }
+        this.data.toggleStockDingTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+            this.data.toggleStockDingTimeoutId = 0;
+            this._callExtensionsDbus(method, uuid);
+            this._callExtensionManager(method, uuid);
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _disableCompetingDesktopExtensions() {
+        let enabled = this._getEnabledExtensions();
+        this.data.stockDingWasEnabled = enabled.includes(STOCK_DING_UUID);
+        this.data.managedStockDing = false;
+
+        const filtered = enabled.filter(uuid => uuid !== STOCK_DING_UUID && uuid !== LEGACY_OVERLAY_UUID);
+        if (filtered.length !== enabled.length) {
+            this.data.managedStockDing = enabled.includes(STOCK_DING_UUID);
+            this._setEnabledExtensions(filtered);
+        }
+        if (this.data.stockDingWasEnabled) {
+            this._scheduleExtensionsDbus('DisableExtension', STOCK_DING_UUID);
+        }
+        if (enabled.includes(LEGACY_OVERLAY_UUID)) {
+            this._callExtensionsDbus('DisableExtension', LEGACY_OVERLAY_UUID);
+        }
+    }
+
+    _restoreStockDing() {
+        if (!this.data.shellSettings) {
+            return;
+        }
+        if (!this.data.managedStockDing || !this.data.stockDingWasEnabled) {
+            return;
+        }
+
+        let enabled = this._getEnabledExtensions();
+        if (!enabled.includes(STOCK_DING_UUID)) {
+            enabled.push(STOCK_DING_UUID);
+            this._setEnabledExtensions(enabled);
+        }
+        this._callExtensionsDbus('EnableExtension', STOCK_DING_UUID);
+        this._callExtensionManager('EnableExtension', STOCK_DING_UUID);
+
+        this.data.managedStockDing = false;
     }
 
     /**

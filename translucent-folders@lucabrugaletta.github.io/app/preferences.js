@@ -33,6 +33,7 @@ var nautilusSettings;
 var nautilusCompression;
 var gtkSettings;
 var desktopSettings;
+var folderPreviewSettings;
 var mutterSettings = null;
 // This is already in Nautilus settings, so it should not be made tweakable here
 var CLICK_POLICY_SINGLE = false;
@@ -68,6 +69,12 @@ function init(path) {
     }
 
     desktopSettings = PrefsWindow.get_schema(path, Enums.SCHEMA);
+    try {
+        folderPreviewSettings = PrefsWindow.get_schema(path, Enums.SCHEMA_TRANSLUCENT_FOLDERS);
+    } catch (error) {
+        folderPreviewSettings = null;
+        print(`Translucent Folders schema unavailable, using defaults: ${error.message}`);
+    }
     let schemaMutter = schemaSource.lookup(Enums.SCHEMA_MUTTER, true);
     if (schemaMutter) {
         mutterSettings = new Gio.Settings({settings_schema: schemaMutter});
@@ -90,7 +97,7 @@ function showPreferences() {
     });
     prefsWindow.set_title(_('Settings'));
     DesktopIconsUtil.windowHidePagerTaskbarModal(prefsWindow, true);
-    let frame = PrefsWindow.preferencesFrame(Gtk, desktopSettings, nautilusSettings, gtkSettings);
+    let frame = PrefsWindow.preferencesFrame(Gtk, desktopSettings, nautilusSettings, gtkSettings, folderPreviewSettings);
     prefsWindow.add(frame);
     prefsWindow.show_all();
 }
@@ -159,4 +166,25 @@ function getUnstackList() {
  */
 function setUnstackList(array) {
     desktopSettings.set_strv('unstackedtypes', array);
+}
+
+function get_folder_preview_tile_items() {
+    if (!folderPreviewSettings) {
+        return 4;
+    }
+    return folderPreviewSettings.get_int('folder-preview-tile-items');
+}
+
+function get_folder_preview_show_item_labels() {
+    if (!folderPreviewSettings) {
+        return true;
+    }
+    return folderPreviewSettings.get_boolean('folder-preview-show-item-labels');
+}
+
+function get_folder_preview_tile_size() {
+    if (!folderPreviewSettings) {
+        return 72;
+    }
+    return folderPreviewSettings.get_int('folder-preview-tile-size');
 }

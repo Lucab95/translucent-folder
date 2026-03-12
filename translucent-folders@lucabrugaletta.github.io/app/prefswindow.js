@@ -46,8 +46,9 @@ function get_schema(path, schema) {
  * @param desktopSettings
  * @param nautilusSettings
  * @param gtkSettings
+ * @param folderPreviewSettings
  */
-function preferencesFrame(_Gtk, desktopSettings, nautilusSettings, gtkSettings) {
+function preferencesFrame(_Gtk, desktopSettings, nautilusSettings, gtkSettings, folderPreviewSettings) {
     Gtk = _Gtk;
     let frame = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
@@ -82,6 +83,26 @@ function preferencesFrame(_Gtk, desktopSettings, nautilusSettings, gtkSettings) 
     frame.add(buildSwitcher(desktopSettings, 'show-link-emblem', _('Add an emblem to soft links')));
 
     frame.add(buildSwitcher(desktopSettings, 'dark-text-in-labels', _('Use dark text in icon labels')));
+
+    frame.add(new Gtk.Separator({orientation: Gtk.Orientation.HORIZONTAL}));
+    frame.add(buildSectionLabel(_('Translucent Folders')));
+    frame.add(buildSpinButton(
+        folderPreviewSettings,
+        'folder-preview-tile-items',
+        _('Preview items shown in folder previews'),
+        1, 9, 1
+    ));
+    frame.add(buildSwitcher(
+        folderPreviewSettings,
+        'folder-preview-show-item-labels',
+        _('Show file names in expanded folder previews')
+    ));
+    frame.add(buildSpinButton(
+        folderPreviewSettings,
+        'folder-preview-tile-size',
+        _('Folder tile size (px)'),
+        48, 120, 4
+    ));
 
     frame.add(new Gtk.Separator({orientation: Gtk.Orientation.HORIZONTAL}));
 
@@ -132,6 +153,14 @@ function preferencesFrame(_Gtk, desktopSettings, nautilusSettings, gtkSettings) 
             'always': _('Always'),
         }));
     return frame;
+}
+
+function buildSectionLabel(labelText) {
+    return new Gtk.Label({
+        label: `<b>${labelText}</b>`,
+        use_markup: true,
+        xalign: 0,
+    });
 }
 
 /**
@@ -210,6 +239,49 @@ function buildSelector(settings, key, labelText, elements) {
     } else {
         hbox.append(label);
         hbox.append(combo);
+    }
+    return hbox;
+}
+
+function buildSpinButton(settings, key, labelText, min, max, step) {
+    let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
+    let label = new Gtk.Label({label: labelText, xalign: 0});
+    let adjustment = new Gtk.Adjustment({
+        lower: min,
+        upper: max,
+        step_increment: step,
+        page_increment: step,
+        value: settings ? settings.get_int(key) : min,
+    });
+    let spin = new Gtk.SpinButton({
+        adjustment,
+        climb_rate: step,
+        digits: 0,
+        numeric: true,
+    });
+    label.set_hexpand(true);
+    spin.set_hexpand(false);
+    spin.set_halign(Gtk.Align.END);
+    if (settings) {
+        spin.set_value(settings.get_int(key));
+        spin.connect('value-changed', widget => {
+            settings.set_int(key, widget.get_value_as_int());
+        });
+        settings.connect(`changed::${key}`, () => {
+            const current = settings.get_int(key);
+            if (spin.get_value_as_int() !== current) {
+                spin.set_value(current);
+            }
+        });
+    } else {
+        spin.sensitive = false;
+    }
+    if (hbox.pack_start) {
+        hbox.pack_start(label, true, true, 0);
+        hbox.add(spin);
+    } else {
+        hbox.append(label);
+        hbox.append(spin);
     }
     return hbox;
 }

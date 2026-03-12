@@ -57,6 +57,10 @@ button.folder-preview-entry {
     padding: 0;
 }
 
+button.folder-preview-entry-icon-only {
+    padding: 6px;
+}
+
 button.folder-preview-entry:hover {
     background: rgba(255, 255, 255, 0.14);
 }

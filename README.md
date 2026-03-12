@@ -1,96 +1,52 @@
-# Desktop Organizer Folders
+# Translucent Folders
 
-`Desktop Organizer Folders` is a small fork of Desktop Icons NG (`DING`) that changes how desktop folders look and behave.
+`Translucent Folders` is a GNOME Shell extension that gives desktop folders a translucent preview-style appearance on top of DING behavior.
 
-It keeps DING's native desktop handling for:
+What it changes:
 
-- drag and drop
-- monitor support
-- desktop ownership and z-order
-- normal file behavior
-
-It adds an optional folder-focused UI layer:
-
-- desktop folders render as rounded preview tiles
-- the tile shows up to 4 child icons
-- single click opens a preview popover
-- double click still opens the folder in Files
+- folders render as rounded translucent tiles
+- the closed folder tile shows a preview of the folder contents
+- single click opens a folder preview popover
+- double click still opens the folder normally
 - clicking outside closes the preview
 
-## Status
+Configurable settings:
 
-This repository is prepared to be published as a GPLv3 fork/patch set.
+- number of preview items shown
+- whether expanded previews show item names
+- preferred folder tile size in pixels
 
-It is not presented as official DING.
+## Repository Contents
 
-## Upstream
+- [translucent-folders@lucabrugaletta.github.io](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/translucent-folders@lucabrugaletta.github.io): extension source
+- [scripts/install-translucent-folders.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/install-translucent-folders.sh): compile schemas, build the zip, and install locally with `gnome-extensions`
+- [ATTRIBUTION.md](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/ATTRIBUTION.md): upstream attribution for DING
+- [COPYING](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/COPYING): GPL license text
 
-This project is derived from:
-
-- Desktop Icons NG (`DING`)
-- Upstream site: https://gitlab.com/rastersoft/desktop-icons-ng
-
-See [ATTRIBUTION.md](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/ATTRIBUTION.md) for details.
-
-## License
-
-This fork should be distributed under `GPL-3.0-only`.
-
-- Full license text: [COPYING](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/COPYING)
-- Summary of changes: [CHANGES.md](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/CHANGES.md)
-
-## Repository Layout
-
-- [ding-transparent-folders@lucabrugaletta.com](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/ding-transparent-folders@lucabrugaletta.com): source fork of DING with the folder-preview changes
-- [scripts/install-user-override.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/install-user-override.sh): install as a local override in `~/.local/share/gnome-shell/extensions/ding@rastersoft.com`
-- [scripts/install-system-extension.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/install-system-extension.sh): install into `/usr/share/...` with backup
-- [scripts/restore-system-extension.sh](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/scripts/restore-system-extension.sh): restore the backed up system DING copy
-- `transparent-folders@lucabrugaletta`: archived experimental overlay approach, not the recommended path
-
-## Install
-
-### Option 1: User override
-
-Use this if your GNOME session prefers the user extension copy over the distro one.
+## Local Install
 
 ```bash
-./scripts/install-user-override.sh
+./scripts/install-translucent-folders.sh
+gnome-extensions enable translucent-folders@lucabrugaletta.github.io
 ```
 
-### Option 2: System install
-
-Use this if Ubuntu keeps loading DING from `/usr/share/gnome-shell/extensions/ding@rastersoft.com`.
+Open preferences with:
 
 ```bash
-./scripts/install-system-extension.sh
+gnome-extensions prefs translucent-folders@lucabrugaletta.github.io
 ```
 
-This script:
+## Packaging
 
-- creates a dated backup of the current system DING
-- copies this fork into the live system DING path
-- restarts the DING extension
-
-## Verify
+The local installer also produces a zip in `dist/`:
 
 ```bash
-gnome-extensions info ding@rastersoft.com
+dist/translucent-folders@lucabrugaletta.github.io.shell-extension.zip
 ```
 
-What matters:
+That zip is the package you use for local testing and release preparation.
 
-- the extension is enabled
-- the folder preview behavior is active
+## Notes
 
-If GNOME keeps stale code loaded, log out and back in once.
-
-## Publishing
-
-Before publishing to GitHub:
-
-1. Create a new repository for this fork.
-2. Keep `COPYING`, `ATTRIBUTION.md`, and `CHANGES.md` in the root.
-3. Make clear in the repo description that this is a DING fork/patch set.
-4. If you later publish a separate commercial organizer app, keep this DING-derived component separate and GPL.
-
-See [PUBLISHING.md](/home/lucabrugaletta/Desktop/personal/desktop%20organizer/PUBLISHING.md).
+- This project is derived from DING and remains GPL-covered accordingly.
+- The extension uses a unique UUID and is intended to be distributed as its own installable extension.

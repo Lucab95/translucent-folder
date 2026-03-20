@@ -1,0 +1,55 @@
+window {
+  background: linear-gradient(180deg, rgba(246,248,251,1) 0%, rgba(238,242,247,1) 100%);
+}
+
+.hero-card,
+.panel-card,
+.metric-card {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(23, 36, 54, 0.08);
+  box-shadow: 0 8px 28px rgba(20, 31, 45, 0.08);
+}
+
+.hero-card {
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(18, 70, 128, 0.96) 0%, rgba(45, 116, 170, 0.92) 100%);
+  color: white;
+}
+
+.metric-card {
+  padding: 18px;
+}
+
+.panel-card {
+  padding: 18px;
+}
+
+.metric-number {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.metric-label {
+  opacity: 0.7;
+}
+
+.hero-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.hero-title {
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.hero-body {
+  opacity: 0.9;
+}
+
+.subtle-caption {
+  opacity: 0.65;
+}

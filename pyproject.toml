@@ -1,0 +1,8 @@
+[project]
+name = "desktop-atelier"
+version = "0.1.0"
+description = "Desktop organizer and motion wallpaper control app for Ubuntu GNOME"
+requires-python = ">=3.12"
+
+[tool.setuptools]
+packages = ["desktop_atelier"]

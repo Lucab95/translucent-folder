@@ -6,7 +6,7 @@ window {
 .panel-card,
 .metric-card {
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(23, 36, 54, 0.08);
   box-shadow: 0 8px 28px rgba(20, 31, 45, 0.08);
 }
@@ -28,28 +28,50 @@ window {
 .metric-number {
   font-size: 28px;
   font-weight: 800;
+  color: #16263a;
 }
 
 .metric-label {
-  opacity: 0.7;
+  color: rgba(22, 38, 58, 0.72);
 }
 
 .hero-eyebrow {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .hero-title {
   font-size: 32px;
   font-weight: 800;
+  color: #ffffff;
 }
 
 .hero-body {
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .subtle-caption {
-  opacity: 0.65;
+  color: rgba(33, 49, 69, 0.68);
+}
+
+.body-text {
+  color: #16263a;
+}
+
+.section-title {
+  color: #112132;
+}
+
+.panel-card button,
+.metric-card button,
+.panel-card label,
+.metric-card label {
+  color: #16263a;
+}
+
+.hero-card button,
+.hero-card label {
+  color: #ffffff;
 }

@@ -259,12 +259,13 @@ class DesktopAtelierWindow(Adw.ApplicationWindow):
         return frame
 
     def _section_title(self, text: str) -> Gtk.Widget:
-        return self._label(text, weight='bold')
+        return self._label(text, classes=['section-title'], weight='bold')
 
     def _label(self, text: str, classes: list[str] | None = None, wrap: bool = False, weight: str | None = None) -> Gtk.Widget:
         label = Gtk.Label(label=text, xalign=0)
         label.set_wrap(wrap)
         label.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        label.add_css_class('body-text')
         if weight == 'bold':
             label.set_markup(f'<b>{GLib.markup_escape_text(text)}</b>')
         if classes:

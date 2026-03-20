@@ -11,6 +11,16 @@ window {
   box-shadow: 0 8px 28px rgba(20, 31, 45, 0.08);
 }
 
+button.flat {
+  padding: 0;
+  border-radius: 22px;
+}
+
+button.flat:hover .metric-card {
+  border-color: rgba(35, 91, 148, 0.28);
+  box-shadow: 0 10px 30px rgba(37, 87, 138, 0.14);
+}
+
 .hero-card {
   padding: 24px;
   background: linear-gradient(135deg, rgba(18, 70, 128, 0.96) 0%, rgba(45, 116, 170, 0.92) 100%);
@@ -74,4 +84,14 @@ window {
 .hero-card button,
 .hero-card label {
   color: #ffffff;
+}
+
+list.boxed-list row {
+  border-radius: 16px;
+  margin-bottom: 8px;
+  background: rgba(245, 248, 252, 0.94);
+}
+
+list.boxed-list row:selected {
+  background: rgba(221, 234, 248, 0.96);
 }

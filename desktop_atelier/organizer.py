@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import mimetypes
-import os
 import shutil
 import subprocess
 from collections import defaultdict
@@ -242,6 +241,31 @@ def trash_empty_folders(report: OrganizerReport) -> list[str]:
 def open_desktop(desktop_path: Path | None = None) -> None:
     desktop_path = desktop_path or DESKTOP_DIR
     subprocess.Popen(['xdg-open', str(desktop_path)])
+
+
+def human_size(size_bytes: int) -> str:
+    size = float(size_bytes)
+    units = ['B', 'KB', 'MB', 'GB', 'TB']
+    for unit in units:
+        if size < 1024 or unit == units[-1]:
+            if unit == 'B':
+                return f'{int(size)} {unit}'
+            return f'{size:.1f} {unit}'
+        size /= 1024
+
+
+def describe_item(item: DesktopItem) -> list[str]:
+    details = [
+        f'Path: {item.path}',
+        f'Category: {item.category}',
+        f'Last touched: {item.last_touched:%Y-%m-%d %H:%M}',
+        f'Age: {item.age_days} days',
+    ]
+    if item.is_dir:
+        details.append('Type: Folder')
+    else:
+        details.append(f'Size: {human_size(item.size_bytes)}')
+    return details
 
 
 def _unique_destination(path: Path) -> Path:
